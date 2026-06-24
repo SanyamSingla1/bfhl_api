@@ -1,48 +1,56 @@
 import { useState } from "react";
 import axios from "axios";
+import "./App.css";
 
 function App() {
   const [input, setInput] = useState("");
-  const [result, setResult] = useState(null);
+  const [response, setResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
     try {
+      setLoading(true);
+
       const data = input
         .split(",")
-        .map(item => item.trim());
+        .map(item => item.trim())
+        .filter(item => item !== "");
 
       const res = await axios.post(
-        "https://YOUR-BACKEND-URL.onrender.com/bfhl",
+        "https://bfhl-api-k6g4.onrender.com/bfhl",
         { data }
       );
 
-      setResult(res.data);
-    } catch (err) {
+      setResponse(res.data);
+    } catch (error) {
       alert("API Error");
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>BFHL Challenge</h1>
+    <div className="container">
+      <h1>BFHL Hierarchy Builder</h1>
 
       <textarea
         rows="8"
-        cols="50"
-        value={input}
         placeholder="A->B, A->C, B->D"
+        value={input}
         onChange={(e) => setInput(e.target.value)}
       />
 
-      <br /><br />
-
       <button onClick={handleSubmit}>
-        Submit
+        {loading ? "Loading..." : "Submit"}
       </button>
 
-      <pre>
-        {JSON.stringify(result, null, 2)}
-      </pre>
+      {response && (
+        <div className="result">
+          <h2>Response</h2>
+          <pre>{JSON.stringify(response, null, 2)}</pre>
+        </div>
+      )}
     </div>
   );
 }
